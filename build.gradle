@@ -1,0 +1,46 @@
+plugins {
+	id 'org.jetbrains.kotlin.jvm' version '1.8.10'
+	id 'com.gradle.plugin-publish' version '1.1.0'
+	id 'maven-publish'
+	id 'java-gradle-plugin'
+}
+
+// Unless overridden in the pluginBundle config DSL, the project version will
+// be used as your plugin version when publishing
+group = 'eu.rehost'
+version = project.property('version')
+
+repositories {
+	mavenCentral()
+}
+
+
+// Use java-gradle-plugin to generate plugin descriptors and specify plugin ids
+gradlePlugin {
+	website = 'https://git.rehost.eu/rehost/gradle-torque'
+	vcsUrl = 'https://git.rehost.eu/rehost/gradle-torque.git'
+	plugins {
+		torque {
+			id = 'eu.rehost.torque'
+			description = 'Provides the capability to compile JasperReports design files.'
+			implementationClass = 'eu.rehost.plugins.TorquePlugin'
+			displayName = 'Gradle Torque Plugin'
+			tags.set(['torque'])
+		}
+	}
+}
+
+dependencies {
+	implementation 'org.apache.torque:torque-generator:5.1'
+}
+//publishing {
+	// uncomment the following section to publish plugin to local maven repository using the following task:
+	// $ gradle publishToMavenLocal
+//	repositories {
+		// mavenLocal()
+//		maven {
+//			url = uri("../local-maven")
+//		}
+//	}
+//}
+
