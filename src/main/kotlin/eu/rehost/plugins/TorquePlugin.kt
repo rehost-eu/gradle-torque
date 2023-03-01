@@ -1,41 +1,37 @@
 package eu.rehost.plugins
 
-import eu.rehost.tasks.CompileReport
+import eu.rehost.tasks.GenerateOm
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 
-interface JasperReportsExtension {
-    val source: DirectoryProperty
-    val output: DirectoryProperty
+interface TorqueExtension {
+    val sourceDir: DirectoryProperty
+    val outputDir: DirectoryProperty
+    val outputModifiableDir: DirectoryProperty
 }
 
-class JasperReportsPlugin: Plugin<Project> {
+class TorquePlugin: Plugin<Project> {
 
     override fun apply(project: Project) {
-        // println("Applying jasperreports plugin!")
-        val extension = project.extensions.create("jasper", JasperReportsExtension::class.java)
-        extension.source.convention(project.layout.projectDirectory.dir("src/main/schema"))
-        extension.output.convention(project.layout.buildDirectory.dir("src/main/java"))
-
-        // Create a custom configuration to specify the desired version of jasperreports to use during compilation
-        val compilerDeps = project.configurations.create("compileReports") {
-            conf ->
-            conf.isVisible = false
-            conf.isCanBeConsumed = false
-            conf.isCanBeResolved = true
-            conf.description = "The specific Torque Version for the compilation task."
-            conf.defaultDependencies {
-                deps ->
-                deps.add(project.dependencies.create("org.apache.torque:torque-generator:5.1"))
-            }
-        }
+        // println("Applying torque plugin!")
+        val extension = project.extensions.create("torque", TorqueExtension::class.java)
+        extension.sourceDir.convention(project.layout.projectDirectory.dir("src/main/schema"))
+        extension.outputDir.convention(project.layout.buildDirectory.dir("src/main/java"))
+        extension.outputModifiableDir.convention(project.layout.projectDirectory.dir("src/main/java"))
 
         val defaultTask = project.tasks.register("generateOm", GenerateOm::class.java) {
             task ->
-            task.inputFiles.from(extension.source.get())
-            task.outputDir.set(extension.output.get())
+            task.sourceDir.set(extension.sourceDir.get())
+            task.outputDir.set(extension.outputDir.get())
+            task.outputModifiableDir.set(extension.outputModifiableDir.get())
+
         }
+        // Automatically route the specified compiler files to all tasks unless the user overrides them manually
+        project.tasks.withType(GenerateOm::class.java).configureEach {
+                task ->
+                task.torquePackage.set("torque.default")
+        }
+
     }
-    
 }

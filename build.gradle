@@ -32,6 +32,7 @@ gradlePlugin {
 
 dependencies {
 	implementation 'org.apache.torque:torque-generator:5.1'
+	implementation 'org.apache.torque:torque-templates:5.1'
 }
 //publishing {
 	// uncomment the following section to publish plugin to local maven repository using the following task:
