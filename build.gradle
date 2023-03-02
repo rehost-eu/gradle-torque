@@ -12,6 +12,9 @@ version = project.property('version')
 
 repositories {
 	mavenCentral()
+	maven {
+		url 'https://git.rehost.eu/api/v4/projects/137/packages/maven'
+	}
 }
 
 
@@ -31,8 +34,7 @@ gradlePlugin {
 }
 
 dependencies {
-	//implementation 'org.apache.torque:torque-generator:5.1'
-	implementation(fileTree("lib"))
+	implementation 'org.apache.torque:torque-generator:5.2-SNAPSHOT' // FIXME: using forked generator cause of groovyshell bug
 	implementation 'org.apache.torque:torque-templates:5.1'
 	//implementation 'io.github.classgraph:classgraph:4.8.155'
 
