@@ -30,7 +30,6 @@ class TorquePlugin: Plugin<Project> {
         extension.outputSqlDir.convention(project.layout.projectDirectory.dir("sql-schema"))
 
         project.plugins.withType(JavaPlugin::class.java) {
-            plugin ->
             val sourceSets = project.extensions.getByType(SourceSetContainer::class.java)
             val main = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
             main.java.srcDir(extension.outputDir.get())
@@ -45,15 +44,19 @@ class TorquePlugin: Plugin<Project> {
 
         }
         project.tasks.register("generateSql", GenerateSql::class.java) {
-                task ->
+            task ->
             task.sourceDir.set(extension.sourceDir.get())
             task.outputSqlDir.set(extension.outputSqlDir.get())
 
         }
         // Automatically route the specified compiler files to all tasks unless the user overrides them manually
         project.tasks.withType(GenerateOm::class.java).configureEach {
-                task ->
-                task.torquePackage.set("torque.default")
+            task ->
+            task.torquePackage.set("torque.default")
+        }
+        project.tasks.withType(GenerateSql::class.java).configureEach {
+            task ->
+            task.torqueDatabase.set("mysql")
         }
 
     }
