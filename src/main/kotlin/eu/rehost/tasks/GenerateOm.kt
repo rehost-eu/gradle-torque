@@ -43,22 +43,24 @@ abstract class GenerateOm @Inject constructor(private val executor: WorkerExecut
 
     @TaskAction
     fun generateOm() {
-            val controller = Controller()
-            val unitDescriptors: MutableList<UnitDescriptor> = ArrayList()
-            val overrideOptions: MutableMap<String, String> = HashMap()
-            overrideOptions["torque.om.package"] = torquePackage.get().toString()
-            val projectPaths = CustomProjectPaths(Maven2DirectoryProjectPaths(File(".")))
-            projectPaths.configurationPackage = "org.apache.torque.templates.om"
-            projectPaths.setConfigurationDir(null)
-            projectPaths.setSourceDir(File(sourceDir.get().toString()))
-            projectPaths.setOutputDirectory(Maven2ProjectPaths.MODIFIABLE_OUTPUT_DIR_KEY, File(outputModifiableDir.get().toString()))
-            projectPaths.setOutputDirectory(null, File(outputDir.get().toString()))
-            val unitDescriptor =
-                UnitDescriptor(UnitDescriptor.Packaging.CLASSPATH, projectPaths, DefaultTorqueGeneratorPaths())
-            unitDescriptor.overrideOptions =
-                MapOptionsConfiguration(overrideOptions)
-            unitDescriptors.add(unitDescriptor)
-            controller.run(unitDescriptors)
+        val controller = Controller()
+        val unitDescriptors: MutableList<UnitDescriptor> = ArrayList()
+        val overrideOptions: MutableMap<String, String> = HashMap()
+        overrideOptions["torque.om.package"] = torquePackage.get().toString()
+        overrideOptions["torque.om.complexObjectModel"] = "false"
+        overrideOptions["torque.om.objectIsCaching"] = "false"
+        val projectPaths = CustomProjectPaths(Maven2DirectoryProjectPaths(File(".")))
+        projectPaths.configurationPackage = "org.apache.torque.templates.om"
+        projectPaths.setConfigurationDir(null)
+        projectPaths.setSourceDir(File(sourceDir.get().toString()))
+        projectPaths.setOutputDirectory(Maven2ProjectPaths.MODIFIABLE_OUTPUT_DIR_KEY, File(outputModifiableDir.get().toString()))
+        projectPaths.setOutputDirectory(null, File(outputDir.get().toString()))
+        val unitDescriptor =
+            UnitDescriptor(UnitDescriptor.Packaging.CLASSPATH, projectPaths, DefaultTorqueGeneratorPaths())
+        unitDescriptor.overrideOptions =
+            MapOptionsConfiguration(overrideOptions)
+        unitDescriptors.add(unitDescriptor)
+        controller.run(unitDescriptors)
     }
     init {
         group = "build"
