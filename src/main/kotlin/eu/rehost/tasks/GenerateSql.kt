@@ -17,11 +17,11 @@ import org.gradle.workers.WorkerExecutor
 import java.io.File
 import javax.inject.Inject
 
-
 abstract class GenerateSql @Inject constructor(private val executor: WorkerExecutor) : DefaultTask() {
 
     @get:Input
     abstract val torqueDatabase: Property<String>
+    abstract val generateDrops: Property<Boolean>
 
     @get:InputFiles
     abstract val sourceDir: DirectoryProperty
@@ -35,6 +35,7 @@ abstract class GenerateSql @Inject constructor(private val executor: WorkerExecu
         val unitDescriptors: MutableList<UnitDescriptor> = ArrayList()
         val overrideOptions: MutableMap<String, String> = HashMap()
         overrideOptions["torque.database"] = torqueDatabase.get().toString()
+        overrideOptions["torque.sql.generate.drops"] = generateDrops.get().toString()
         val projectPaths = CustomProjectPaths(Maven2DirectoryProjectPaths(File(".")))
         projectPaths.configurationPackage = "org.apache.torque.templates.sql"
         projectPaths.setConfigurationDir(null)

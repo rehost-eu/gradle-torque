@@ -1,6 +1,5 @@
 package eu.rehost.tasks
 
-import org.apache.logging.log4j.core.tools.Generate
 import org.apache.torque.generator.configuration.UnitDescriptor
 import org.apache.torque.generator.configuration.option.MapOptionsConfiguration
 import org.apache.torque.generator.configuration.paths.CustomProjectPaths
@@ -9,27 +8,45 @@ import org.apache.torque.generator.configuration.paths.Maven2DirectoryProjectPat
 import org.apache.torque.generator.configuration.paths.Maven2ProjectPaths
 import org.apache.torque.generator.control.Controller
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileCollection
-import org.gradle.api.file.FileType
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
-import org.gradle.work.ChangeType
-import org.gradle.work.Incremental
-import org.gradle.work.InputChanges
-import org.gradle.workers.WorkAction
-import org.gradle.workers.WorkParameters
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectories
+import org.gradle.api.tasks.TaskAction
 import org.gradle.workers.WorkerExecutor
 import java.io.File
-import java.net.URLClassLoader
 import javax.inject.Inject
 
 abstract class GenerateOm @Inject constructor(private val executor: WorkerExecutor) : DefaultTask() {
 
     @get:Input
-    abstract val torquePackage: Property<String>
+    abstract val addGetByNameMethods: Property<Boolean>
+    abstract val addSaveMethods: Property<Boolean>
+    abstract val saveException: Property<String>
+    abstract val trackModified: Property<Boolean>
+    abstract val trackNew: Property<Boolean>
+    abstract val addTimeStamp: Property<Boolean>
+    abstract val omPackage: Property<String>
+    abstract val peerPackageSuffix: Property<String>
+    abstract val dbObjectPackageSuffix: Property<String>
+    abstract val mapPackageSuffix: Property<String>
+    abstract val managerPackageSuffix: Property<String>
+    abstract val beanPackageSuffix: Property<String>
+    abstract val baseDbObjectPackageSuffix: Property<String>
+    abstract val basePeerPackageSuffix: Property<String>
+    abstract val baseManagerPackageSuffix: Property<String>
+    abstract val baseBeanPackageSuffix: Property<String>
+    abstract val baseDbObjectClassNamePrefix: Property<String>
+    abstract val basePeerClassNamePrefix: Property<String>
+    abstract val useManagers: Property<Boolean>
+    abstract val complexObjectModel: Property<Boolean>
+    abstract val objectIsCaching: Property<Boolean>
+    abstract val silentDbFetch: Property<Boolean>
+    abstract val useIsForBooleanGetters: Property<Boolean>
+    abstract val generateBeans: Property<Boolean>
+    abstract val beanClassNameSuffix: Property<String>
+    abstract val beanExtendsClass: Property<String>
 
     @get:InputFiles
     abstract val sourceDir: DirectoryProperty
@@ -40,15 +57,38 @@ abstract class GenerateOm @Inject constructor(private val executor: WorkerExecut
     @get:OutputDirectories
     abstract val outputModifiableDir: DirectoryProperty
 
-
     @TaskAction
     fun generateOm() {
         val controller = Controller()
         val unitDescriptors: MutableList<UnitDescriptor> = ArrayList()
         val overrideOptions: MutableMap<String, String> = HashMap()
-        overrideOptions["torque.om.package"] = torquePackage.get().toString()
-        overrideOptions["torque.om.complexObjectModel"] = "false"
-        overrideOptions["torque.om.objectIsCaching"] = "false"
+        overrideOptions["torque.om.addGetByNameMethods"] = addGetByNameMethods.get().toString()
+        overrideOptions["torque.om.save.addSaveMethods"] = addSaveMethods.get().toString()
+        overrideOptions["torque.om.save.saveException"] = saveException.get().toString()
+        overrideOptions["torque.om.trackModified"] = trackModified.get().toString()
+        overrideOptions["torque.om.trackNew"] = trackNew.get().toString()
+        overrideOptions["torque.om.addTimeStamp"] = addTimeStamp.get().toString()
+        overrideOptions["torque.om.package"] = omPackage.get().toString()
+        overrideOptions["torque.om.package.peerPackageSuffix"] = peerPackageSuffix.get().toString()
+        overrideOptions["torque.om.package.dbObjectPackageSuffix"] = dbObjectPackageSuffix.get().toString()
+        overrideOptions["torque.om.package.mapPackageSuffix"] = mapPackageSuffix.get().toString()
+        overrideOptions["torque.om.package.managerPackageSuffix"] = managerPackageSuffix.get().toString()
+        overrideOptions["torque.om.package.beanPackageSuffix"] = beanPackageSuffix.get().toString()
+        overrideOptions["torque.om.package.baseDbObjectPackageSuffix"] = baseDbObjectPackageSuffix.get().toString()
+        overrideOptions["torque.om.package.basePeerPackageSuffix"] = basePeerPackageSuffix.get().toString()
+        overrideOptions["torque.om.package.baseManagerPackageSuffix"] = baseManagerPackageSuffix.get().toString()
+        overrideOptions["torque.om.package.baseBeanPackageSuffix"] = baseBeanPackageSuffix.get().toString()
+        overrideOptions["torque.om.package.baseDbObjectClassNamePrefix"] = baseDbObjectClassNamePrefix.get().toString()
+        overrideOptions["torque.om.package.basePeerClassNamePrefix"] = basePeerClassNamePrefix.get().toString()
+        overrideOptions["torque.om.package.useManagers"] = useManagers.get().toString()
+        overrideOptions["torque.om.complexObjectModel"] = complexObjectModel.get().toString()
+        overrideOptions["torque.om.objectIsCaching"] = objectIsCaching.get().toString()
+        overrideOptions["torque.om.silentDbFetch"] = silentDbFetch.get().toString()
+        overrideOptions["torque.om.useIsForBooleanGetters"] = useIsForBooleanGetters.get().toString()
+        overrideOptions["torque.om.generateBeans"] = generateBeans.get().toString()
+        overrideOptions["torque.om.className.beanClassNameSuffix"] = beanClassNameSuffix.get().toString()
+        overrideOptions["torque.om.bean.beanExtendsClass"] = beanExtendsClass.get().toString()
+
         val projectPaths = CustomProjectPaths(Maven2DirectoryProjectPaths(File(".")))
         projectPaths.configurationPackage = "org.apache.torque.templates.om"
         projectPaths.setConfigurationDir(null)
