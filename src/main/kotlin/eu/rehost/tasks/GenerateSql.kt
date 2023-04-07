@@ -12,6 +12,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.workers.WorkerExecutor
 import java.io.File
@@ -21,9 +22,12 @@ abstract class GenerateSql @Inject constructor(private val executor: WorkerExecu
 
     @get:Input
     abstract val torqueDatabase: Property<String>
+
+    @get:Input
     abstract val generateDrops: Property<Boolean>
 
     @get:InputFiles
+    @get:SkipWhenEmpty
     abstract val sourceDir: DirectoryProperty
 
     @get:OutputDirectory

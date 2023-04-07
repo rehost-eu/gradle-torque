@@ -13,6 +13,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectories
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.workers.WorkerExecutor
 import java.io.File
@@ -22,33 +23,59 @@ abstract class GenerateOm @Inject constructor(private val executor: WorkerExecut
 
     @get:Input
     abstract val addGetByNameMethods: Property<Boolean>
+    @get:Input
     abstract val addSaveMethods: Property<Boolean>
+    @get:Input
     abstract val saveException: Property<String>
+    @get:Input
     abstract val trackModified: Property<Boolean>
+    @get:Input
     abstract val trackNew: Property<Boolean>
+    @get:Input
     abstract val addTimeStamp: Property<Boolean>
+    @get:Input
     abstract val omPackage: Property<String>
+    @get:Input
     abstract val peerPackageSuffix: Property<String>
+    @get:Input
     abstract val dbObjectPackageSuffix: Property<String>
+    @get:Input
     abstract val mapPackageSuffix: Property<String>
+    @get:Input
     abstract val managerPackageSuffix: Property<String>
+    @get:Input
     abstract val beanPackageSuffix: Property<String>
+    @get:Input
     abstract val baseDbObjectPackageSuffix: Property<String>
+    @get:Input
     abstract val basePeerPackageSuffix: Property<String>
+    @get:Input
     abstract val baseManagerPackageSuffix: Property<String>
+    @get:Input
     abstract val baseBeanPackageSuffix: Property<String>
+    @get:Input
     abstract val baseDbObjectClassNamePrefix: Property<String>
+    @get:Input
     abstract val basePeerClassNamePrefix: Property<String>
+    @get:Input
     abstract val useManagers: Property<Boolean>
+    @get:Input
     abstract val complexObjectModel: Property<Boolean>
+    @get:Input
     abstract val objectIsCaching: Property<Boolean>
+    @get:Input
     abstract val silentDbFetch: Property<Boolean>
+    @get:Input
     abstract val useIsForBooleanGetters: Property<Boolean>
+    @get:Input
     abstract val generateBeans: Property<Boolean>
+    @get:Input
     abstract val beanClassNameSuffix: Property<String>
+    @get:Input
     abstract val beanExtendsClass: Property<String>
 
     @get:InputFiles
+    @get:SkipWhenEmpty
     abstract val sourceDir: DirectoryProperty
 
     @get:OutputDirectories
