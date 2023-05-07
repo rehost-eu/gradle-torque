@@ -18,6 +18,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import javax.inject.Inject
+import kotlin.io.path.*
 
 abstract class GenerateOm @Inject constructor(private val executor: WorkerExecutor) : DefaultTask() {
 
@@ -84,6 +85,12 @@ abstract class GenerateOm @Inject constructor(private val executor: WorkerExecut
     @get:OutputDirectories
     abstract val outputModifiableDir: DirectoryProperty
 
+    @get:OutputDirectories
+    abstract val outputBaseBeanDir: DirectoryProperty
+
+    @get:OutputDirectories
+    abstract val outputModifiableBeanDir: DirectoryProperty
+
     @TaskAction
     fun generateOm() {
         val controller = Controller()
@@ -120,15 +127,36 @@ abstract class GenerateOm @Inject constructor(private val executor: WorkerExecut
         projectPaths.configurationPackage = "org.apache.torque.templates.om"
         projectPaths.setConfigurationDir(null)
         projectPaths.setSourceDir(File(sourceDir.get().toString()))
-        projectPaths.setOutputDirectory(Maven2ProjectPaths.MODIFIABLE_OUTPUT_DIR_KEY, File(outputModifiableDir.get().toString()))
-        projectPaths.setOutputDirectory(null, File(outputDir.get().toString()))
+        projectPaths.setOutputDirectory(Maven2ProjectPaths.MODIFIABLE_OUTPUT_DIR_KEY, File(outputModifiableDir.get().toString())) // non-Base classes
+        projectPaths.setOutputDirectory(null, File(outputDir.get().toString())) // Base classes
         val unitDescriptor =
             UnitDescriptor(UnitDescriptor.Packaging.CLASSPATH, projectPaths, DefaultTorqueGeneratorPaths())
         unitDescriptor.overrideOptions =
             MapOptionsConfiguration(overrideOptions)
         unitDescriptors.add(unitDescriptor)
         controller.run(unitDescriptors)
+
+        moveBeans(outputDir, outputBaseBeanDir, omPackage.get(), beanPackageSuffix.get(), true)
+        moveBeans(outputModifiableDir, outputModifiableBeanDir, omPackage.get(), beanPackageSuffix.get())
+
     }
+
+    @OptIn(ExperimentalPathApi::class)
+    private fun moveBeans(inputDir: DirectoryProperty, outputDir: DirectoryProperty, omPackage: String, beanPackage: String, overwrite: Boolean = false) {
+        if (outputDir != inputDir) {
+            val inputPath = Path(inputDir.get().toString() + '/' + omPackage.replace('.','/') + beanPackage.replace('.','/'))
+            val outputPath = Path(outputDir.get().toString() + '/' + omPackage.replace('.','/') + beanPackage.replace('.','/'))
+            inputPath.copyToRecursively(
+                target = outputPath.apply { parent?.createDirectories() },
+                overwrite = overwrite,
+                followLinks = false,
+                onError = { source, target, exception -> OnErrorResult.SKIP_SUBTREE
+                }
+            )
+            inputPath.deleteRecursively()
+        }
+    }
+
     init {
         group = "build"
     }

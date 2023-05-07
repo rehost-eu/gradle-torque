@@ -11,9 +11,14 @@ import org.gradle.api.tasks.SourceSetContainer
 
 interface TorqueExtension {
     val sourceDir: DirectoryProperty
+
     val outputDir: DirectoryProperty
     val outputModifiableDir: DirectoryProperty
+
     val outputSqlDir: DirectoryProperty
+
+    val outputModifiableBeanDir:DirectoryProperty
+    val outputBaseBeanDir:DirectoryProperty
 
 }
 
@@ -25,6 +30,8 @@ class TorquePlugin: Plugin<Project> {
         extension.sourceDir.convention(project.layout.projectDirectory.dir("src/main/schema")) // we want to use data from xml schemata
         extension.outputDir.convention(project.layout.buildDirectory.dir("src/main/java")) // directory for sources we don't want to touch, will be added to sourceSets
         extension.outputModifiableDir.convention(project.layout.projectDirectory.dir("src/main/java")) // directory for sources we want to touch, normally included in sourceSets
+        extension.outputBaseBeanDir.convention(project.layout.buildDirectory.dir("src/main/java"))
+        extension.outputModifiableBeanDir.convention(project.layout.projectDirectory.dir("src/main/java"))
         extension.outputSqlDir.convention(project.layout.buildDirectory.dir("sql-schema")) // normally used for copy to distribution packages
 
         project.plugins.withType(JavaPlugin::class.java) {
