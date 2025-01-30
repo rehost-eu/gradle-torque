@@ -14,10 +14,10 @@ You can define a custom task with custom paths.
 
 ### Installation
 
-Using the pluging DSL...
+Using gradle with kotlin DSL...
 
     plugins {
-      id "eu.rehost.torque" version "0.0.1"
+      id("eu.rehost.torque") version "6.0"
     }
 
 ### Configuration
@@ -30,6 +30,10 @@ To ask questions or report bugs, please use the [GitLab project](https://git.reh
 
 
 ## Change Log
+### 6.0 (2025-01-30)
+* Major refactor
+* Updated torque version to 6.0 (referencing to the version it uses to generate)
+
 ### 0.0.1 (2023-02-28)
 * Initial Release
 

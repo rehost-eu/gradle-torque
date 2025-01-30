@@ -1,13 +1,14 @@
-package eu.rehost.plugins
+package eu.rehost.torque.extension
 
-import eu.rehost.tasks.GenerateOm
-import eu.rehost.tasks.GenerateSql
+import eu.rehost.torque.tasks.GenerateOm
+import eu.rehost.torque.tasks.GenerateSql
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 interface TorqueExtension {
     val sourceDir: DirectoryProperty
@@ -25,6 +26,7 @@ interface TorqueExtension {
 class TorquePlugin: Plugin<Project> {
 
     override fun apply(project: Project) {
+        val group = "torque"
         // println("Applying torque plugin!")
         val extension = project.extensions.create("torque", TorqueExtension::class.java)
         extension.sourceDir.convention(project.layout.projectDirectory.dir("src/main/schema")) // we want to use data from xml schemata
@@ -40,25 +42,24 @@ class TorquePlugin: Plugin<Project> {
             main.java.srcDir(extension.outputDir.get())
         }
 
-        // we configure path conventions here
-        project.tasks.register("generateOm", GenerateOm::class.java) {
-            task ->
-            task.sourceDir.set(extension.sourceDir.get())
-            task.outputDir.set(extension.outputDir.get())
-            task.outputModifiableDir.set(extension.outputModifiableDir.get())
+        val generateOmTask = project.tasks.register("generateOm") {
 
         }
 
-        project.tasks.register("generateSql", GenerateSql::class.java) {
-            task ->
-            task.sourceDir.set(extension.sourceDir.get())
-            task.outputSqlDir.set(extension.outputSqlDir.get())
+        val generateSqlTask = project.tasks.register("generateSql") {
 
         }
 
         // we configure the generation variables here
         project.tasks.withType(GenerateOm::class.java).configureEach {
             task ->
+            task.group = group
+            task.description = "Generates the Object Model (OM) classes."
+            // path conventions
+            task.sourceDir.set(extension.sourceDir.get())
+            task.outputDir.set(extension.outputDir.get())
+            task.outputModifiableDir.set(extension.outputModifiableDir.get())
+            // defaults
             task.addGetByNameMethods.set(true)
             task.addSaveMethods.set(true)
             task.saveException.set("Exception")
@@ -90,8 +91,28 @@ class TorquePlugin: Plugin<Project> {
 
         project.tasks.withType(GenerateSql::class.java).configureEach {
             task ->
+            task.group = group
+            task.description = "Generates the SQL schema files."
+            // path conventions
+            task.sourceDir.set(extension.sourceDir.get())
+            task.outputSqlDir.set(extension.outputSqlDir.get())
+            // defaults
             task.torqueDatabase.set("mysql")
             task.generateDrops.set(true)
+        }
+
+        project.afterEvaluate {
+            val generateOmTasks = project.tasks.withType(GenerateOm::class.java).toList()
+            val generateSqlTasks = project.tasks.withType(GenerateSql::class.java).toList()
+
+            // Now we can safely add dependencies to the generateOm task
+            generateOmTasks.forEach { task ->
+                generateOmTask.get().dependsOn(task)
+            }
+            // Now we can safely add dependencies to the generateOm task
+            generateSqlTasks.forEach { task ->
+                generateSqlTask.get().dependsOn(task)
+            }
         }
 
     }

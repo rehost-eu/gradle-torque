@@ -1,4 +1,4 @@
-package eu.rehost.tasks
+package eu.rehost.torque.tasks
 
 import org.apache.torque.generator.configuration.UnitDescriptor
 import org.apache.torque.generator.configuration.option.MapOptionsConfiguration
